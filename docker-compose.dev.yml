@@ -1,0 +1,109 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: cybesphere_postgres_dev
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=es_ES.UTF-8 --lc-ctype=es_ES.UTF-8"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/db/init:/docker-entrypoint-initdb.d/
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cybesphere_user -d cybesphere_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - cybesphere_network
+
+  # Redis (Optional - for caching and sessions)
+  redis:
+    image: redis:7-alpine
+    container_name: cybesphere_redis_dev
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    networks:
+      - cybesphere_network
+
+  # Docmost - Documentation Wiki
+  docmost:
+    image: docmost/docmost:latest
+    container_name: cybesphere_docmost_dev
+    environment:
+      APP_URL: "localhost:3000"
+      APP_SECRET: ${DOCMOST_APP_SECRET}
+      DATABASE_URL: "postgresql://${DOCMOST_DB_USER}:${DOCMOST_DB_PASSWORD}@docmost_db:5432/${DOCMOST_DB_NAME}"
+    ports:
+      - "3000:3000"
+    depends_on:
+      docmost_db:
+        condition: service_healthy
+    networks:
+      - cybesphere_network
+
+  # Docmost Database
+  docmost_db:
+    image: postgres:15-alpine
+    container_name: cybesphere_docmost_db_dev
+    environment:
+      POSTGRES_DB: ${DOCMOST_DB_NAME}
+      POSTGRES_USER: ${DOCMOST_DB_USER}
+      POSTGRES_PASSWORD: ${DOCMOST_DB_PASSWORD}
+    volumes:
+      - docmost_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U docmost_user -d docmost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - cybesphere_network
+
+  # pgAdmin (Optional - Database Administration)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: cybesphere_pgadmin_dev
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@cybesphere.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+    networks:
+      - cybesphere_network
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  docmost_data:
+    driver: local
+  pgadmin_data:
+    driver: local
+
+networks:
+  cybesphere_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
