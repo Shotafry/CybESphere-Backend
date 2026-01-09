@@ -72,7 +72,12 @@ func (es *EventSeeder) Seed(db *gorm.DB) error {
 		return err
 	}
 
-	// 6. Generar eventos adicionales aleatorios
+	// 6. Crear eventos específicos para filtros (Madrid, Barcelona, Valencia, Bilbao)
+	if err := es.createTargetedFilterEvents(db, organizations); err != nil {
+		return err
+	}
+
+	// 7. Generar eventos adicionales aleatorios
 	if err := es.generateRandomEvents(db, organizations, 25); err != nil {
 		return err
 	}
@@ -118,7 +123,7 @@ func (es *EventSeeder) createFeaturedEvents(db *gorm.DB, organizations []models.
 			Price:           func() *int { i := 25000; return &i }(), // 250€
 			Currency:        "EUR",
 			RegistrationURL: "https://cybersec-summit.es/registro",
-			ImageURL:        "https://images.example.com/cybersec-summit-2024.jpg",
+			ImageURL:        "/asturcon-low-1@2x.png",
 			Status:          models.EventStatusPublished,
 			IsPublic:        true,
 			IsFeatured:      true,
@@ -158,6 +163,7 @@ func (es *EventSeeder) createFeaturedEvents(db *gorm.DB, organizations []models.
 			IsFeatured:     true,
 			ContactEmail:   "bootcamp@cybersecurityspain.org",
 			Requirements:   "Conocimientos básicos de redes y sistemas. Conexión a internet estable para laboratorios remotos.",
+			ImageURL:       "/CloudEvents-logo-1@2x.png",
 			Agenda: `Día 1: Fundamentos y Reconocimiento
 - Metodologías de pentesting
 - Information gathering
@@ -235,6 +241,7 @@ func (es *EventSeeder) createUpcomingEvents(db *gorm.DB, organizations []models.
 			Status:         models.EventStatusPublished,
 			IsPublic:       true,
 			ContactEmail:   "eventos@cybersecurityspain.org",
+			ImageURL:       "/cyberLogo-1@2x.png",
 		},
 		{
 			Title:          "Red Team vs Blue Team: Simulacro en Vivo",
@@ -255,6 +262,7 @@ func (es *EventSeeder) createUpcomingEvents(db *gorm.DB, organizations []models.
 			IsFree:         true,
 			Status:         models.EventStatusPublished,
 			IsPublic:       true,
+			ImageURL:       "/cyberLogo-gigapixel-art-scale-2-00x-godpix-1@2x.png",
 		},
 		{
 			Title:          "Webinar: Nuevas Amenazas en Cloud Security",
@@ -272,6 +280,7 @@ func (es *EventSeeder) createUpcomingEvents(db *gorm.DB, organizations []models.
 			IsFree:         true,
 			Status:         models.EventStatusPublished,
 			IsPublic:       true,
+			ImageURL:       "/CloudEvents-logo-11@2x.png",
 		},
 	}
 
@@ -319,7 +328,6 @@ func (es *EventSeeder) createUpcomingEvents(db *gorm.DB, organizations []models.
 }
 
 // createPastEvents crea eventos que ya ocurrieron
-// createPastEvents crea eventos que ya ocurrieron
 func (es *EventSeeder) createPastEvents(db *gorm.DB, organizations []models.Organization) error {
 	pastEvents := []*models.Event{
 		{
@@ -334,9 +342,9 @@ func (es *EventSeeder) createPastEvents(db *gorm.DB, organizations []models.Orga
 			EndDate:          time.Now().AddDate(0, 0, -30).Add(4 * time.Hour),
 			Status:           models.EventStatusCompleted,
 			IsOnline:         false,
-			VenueAddress:     "Calle de Alcalá, 123, Madrid",   // ADD THIS LINE
-			VenueName:        "Centro de Formación TechMadrid", // ADD THIS LINE
-			VenueCity:        "Madrid",
+			VenueAddress:     "Calle de Alcalá, 123, Madrid",
+			VenueName:        "Centro de Formación TechMadrid",
+			VenueCity:       "Madrid",
 			VenueCountry:     "Spain",
 			MaxAttendees:     func() *int { i := 50; return &i }(),
 			CurrentAttendees: 45, // 45 personas asistieron
@@ -344,6 +352,7 @@ func (es *EventSeeder) createPastEvents(db *gorm.DB, organizations []models.Orga
 			Price:            func() *int { i := 5000; return &i }(), // 50€
 			IsPublic:         true,
 			ViewsCount:       234, // Muchas visualizaciones
+			ImageURL:         "/cyberLogo-gigapixel-art-scale-2-00x-godpix-11@2x.png",
 		},
 		{
 			Title:            "Análisis Forense Digital: Casos Reales",
@@ -357,12 +366,13 @@ func (es *EventSeeder) createPastEvents(db *gorm.DB, organizations []models.Orga
 			EndDate:          time.Now().AddDate(0, 0, -45).Add(2 * time.Hour),
 			Status:           models.EventStatusCompleted,
 			IsOnline:         true,
-			OnlineURL:        "https://zoom.us/j/completed-session", // ADD THIS LINE FOR ONLINE EVENT
+			OnlineURL:        "https://zoom.us/j/completed-session",
 			MaxAttendees:     func() *int { i := 150; return &i }(),
 			CurrentAttendees: 132,
 			IsFree:           true,
 			IsPublic:         true,
 			ViewsCount:       456,
+			ImageURL:         "/CloudEvents-logo-2@2x.png",
 		},
 	}
 
@@ -409,7 +419,6 @@ func (es *EventSeeder) createPastEvents(db *gorm.DB, organizations []models.Orga
 }
 
 // createEventsInDifferentStates crea eventos en diferentes estados para testing
-// createEventsInDifferentStates crea eventos en diferentes estados para testing
 func (es *EventSeeder) createEventsInDifferentStates(db *gorm.DB, organizations []models.Organization) error {
 	testEvents := []*models.Event{
 		{
@@ -423,9 +432,10 @@ func (es *EventSeeder) createEventsInDifferentStates(db *gorm.DB, organizations 
 			EndDate:        time.Now().AddDate(0, 1, 0).Add(2 * time.Hour),
 			Status:         models.EventStatusDraft, // Estado borrador
 			IsOnline:       true,
-			OnlineURL:      "https://meet.google.com/draft-event-test", // ADD THIS LINE
+			OnlineURL:      "https://meet.google.com/draft-event-test",
 			IsFree:         true,
 			IsPublic:       false, // No público hasta publicar
+			ImageURL:       "/cyberLogo-1@2x.png",
 		},
 		{
 			Title:          "Evento Cancelado - Test",
@@ -438,12 +448,13 @@ func (es *EventSeeder) createEventsInDifferentStates(db *gorm.DB, organizations 
 			EndDate:        time.Now().AddDate(0, 0, -10).Add(2 * time.Hour),
 			Status:         models.EventStatusCanceled, // Cancelado
 			IsOnline:       false,
-			VenueAddress:   "Plaza Universidad, 1, Barcelona", // ADD THIS LINE
-			VenueName:      "Aula Magna Universidad",          // ADD THIS LINE
+			VenueAddress:   "Plaza Universidad, 1, Barcelona",
+			VenueName:      "Aula Magna Universidad",
 			VenueCity:      "Barcelona",
 			VenueCountry:   "Spain",
 			IsFree:         true,
 			IsPublic:       true,
+			ImageURL:       "/cyberLogo-gigapixel-art-scale-2-00x-godpix-1@2x.png",
 		},
 	}
 
@@ -464,7 +475,173 @@ func (es *EventSeeder) createEventsInDifferentStates(db *gorm.DB, organizations 
 	return nil
 }
 
-// generateRandomEvents crea eventos adicionales aleatorios
+// createTargetedFilterEvents crea eventos específicos para probar los filtros del frontend
+func (es *EventSeeder) createTargetedFilterEvents(db *gorm.DB, organizations []models.Organization) error {
+	logger.Info("🎯 Creando eventos específicos para filtros (Madrid, Barcelona, Valencia, Bilbao)...")
+
+	orgID := organizations[0].ID.String()
+	if len(organizations) > 1 {
+		orgID = organizations[1].ID.String()
+	}
+
+	targetedEvents := []*models.Event{
+		// 1. Workshop en Madrid
+		{
+			Title:          "Taller de Hacking Ético Madrid",
+			Description:    "Taller presencial para aprender técnicas de hacking ético en entornos corporativos.",
+			ShortDesc:      "Taller práctico de hacking ético",
+			Type:           models.EventTypeWorkshop,
+			Category:       "Ethical Hacking",
+			Level:          "intermediate",
+			OrganizationID: organizations[0].ID.String(),
+			StartDate:      time.Now().AddDate(0, 1, 5), // En 1 mes y 5 días
+			EndDate:        time.Now().AddDate(0, 1, 5).Add(4 * time.Hour),
+			Status:         models.EventStatusPublished,
+			IsOnline:       false,
+			VenueCity:      "Madrid",
+			VenueCountry:   "Spain",
+			VenueName:      "Hub de Innovación Madrid",
+			VenueAddress:   "Gran Vía, 28, Madrid",
+			IsFree:         false,
+			Price:          func() *int { i := 5000; return &i }(), // 50€
+			IsPublic:       true,
+			ImageURL:       "/cyberLogo-gigapixel-art-scale-2-00x-godpix-11@2x.png",
+		},
+		// 2. CTF en Barcelona
+		{
+			Title:          "Barcelona CTF Challenge 2024",
+			Description:    "Competición Capture The Flag para equipos de hasta 4 personas. Retos de web, criptografía y forense.",
+			ShortDesc:      "Competición CTF por equipos",
+			Type:           models.EventTypeCompetition, // CTF
+			Category:       "CTF",
+			Level:          "advanced",
+			OrganizationID: orgID,
+			StartDate:      time.Now().AddDate(0, 0, 25), // En 25 días
+			EndDate:        time.Now().AddDate(0, 0, 26), 
+			Status:         models.EventStatusPublished,
+			IsOnline:       false,
+			VenueCity:      "Barcelona",
+			VenueCountry:   "Spain",
+			VenueName:      "Tech City Barcelona",
+			VenueAddress:   "Plaça de Catalunya, 1, Barcelona",
+			IsFree:         true,
+			IsPublic:       true,
+			ImageURL:       "/cyberLogo-gigapixel-art-scale-2-00x-godpix-1@2x.png",
+		},
+		// 3. Meetup en Valencia
+		{
+			Title:          "Valencia Cyber Security Meetup",
+			Description:    "Encuentro mensual de la comunidad de ciberseguridad de Valencia. Networking y charlas cortas.",
+			ShortDesc:      "Networking y charlas de ciberseguridad",
+			Type:           models.EventTypeMeetup,
+			Category:       "Networking",
+			Level:          "beginner",
+			OrganizationID: organizations[0].ID.String(),
+			StartDate:      time.Now().AddDate(0, 0, 10), // En 10 días
+			EndDate:        time.Now().AddDate(0, 0, 10).Add(2 * time.Hour),
+			Status:         models.EventStatusPublished,
+			IsOnline:       false,
+			VenueCity:      "Valencia",
+			VenueCountry:   "Spain",
+			VenueName:      "La Centrifugadora",
+			VenueAddress:   "Carrer de les Illes Canàries, 12, Valencia",
+			IsFree:         true,
+			IsPublic:       true,
+			ImageURL:       "/asturcon-low-1@2x.png",
+		},
+		// 4. Conference en Bilbao
+		{
+			Title:          "Bilbao CyberSummit Norte",
+			Description:    "La conferencia de referencia en el norte de España. Ciberseguridad industrial y protección de infraestructuras críticas.",
+			ShortDesc:      "Conferencia de ciberseguridad industrial",
+			Type:           models.EventTypeConference,
+			Category:       "Industrial Security",
+			Level:          "advanced",
+			OrganizationID: orgID,
+			StartDate:      time.Now().AddDate(0, 2, 0), // En 2 meses
+			EndDate:        time.Now().AddDate(0, 2, 1),
+			Status:         models.EventStatusPublished,
+			IsOnline:       false,
+			VenueCity:      "Bilbao",
+			VenueCountry:   "Spain",
+			VenueName:      "Euskalduna Jauregia",
+			VenueAddress:   "Abandoibarra Etorb., 4, Bilbao",
+			IsFree:         false,
+			Price:          func() *int { i := 15000; return &i }(), // 150€
+			IsPublic:       true,
+			ImageURL:       "/CloudEvents-logo-1@2x.png",
+		},
+		// 5. Workshop en Valencia (Extra coverage)
+		{
+			Title:          "Taller de Securización Linux en Valencia",
+			Description:    "Aprende a securizar servidores Linux desde cero.",
+			ShortDesc:      "Hardening de servidores Linux",
+			Type:           models.EventTypeWorkshop,
+			Category:       "Linux Security",
+			Level:          "intermediate",
+			OrganizationID: organizations[0].ID.String(),
+			StartDate:      time.Now().AddDate(0, 0, 15),
+			EndDate:        time.Now().AddDate(0, 0, 15).Add(5 * time.Hour),
+			Status:         models.EventStatusPublished,
+			IsOnline:       false,
+			VenueCity:      "Valencia",
+			VenueCountry:   "Spain",
+			VenueName:      "Coworking Valencia",
+			VenueAddress:   "Carrer de Colón, 1, Valencia",
+			IsFree:         true,
+			IsPublic:       true,
+			ImageURL:       "/CloudEvents-logo-11@2x.png",
+		},
+	}
+
+	for _, event := range targetedEvents {
+		// Configurar coordenadas aproximadas
+		switch event.VenueCity {
+		case "Madrid":
+			event.SetLocation(40.4168, -3.7038)
+		case "Barcelona":
+			event.SetLocation(41.3851, 2.1734)
+		case "Valencia":
+			event.SetLocation(39.4699, -0.3763)
+		case "Bilbao":
+			event.SetLocation(43.2627, -2.9253)
+		}
+
+		// Configurar fechas de registro
+		regStart := time.Now().AddDate(0, 0, -10)
+		regEnd := event.StartDate.AddDate(0, 0, -1)
+		event.RegistrationStartDate = &regStart
+		event.RegistrationEndDate = &regEnd
+
+		// Publicado
+		published := time.Now().AddDate(0, 0, -5)
+		event.PublishedAt = &published
+
+		// Generar tags
+		tags := []string{
+			strings.ToLower(event.Category),
+			strings.ToLower(string(event.Type)),
+			strings.ToLower(event.VenueCity),
+			event.Level,
+		}
+		if event.IsFree {
+			tags = append(tags, "free")
+		}
+		
+		if err := event.SetTags(tags); err != nil {
+			logger.Warnf("Error asignando tags al evento %s: %v", event.Title, err)
+		}
+		
+		event.ContactEmail = "info@cybesphere.com"
+
+		if err := db.Create(event).Error; err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 // generateRandomEvents crea eventos adicionales aleatorios
 func (es *EventSeeder) generateRandomEvents(db *gorm.DB, organizations []models.Organization, count int) error {
 	eventTitles := [][]string{
@@ -526,6 +703,16 @@ func (es *EventSeeder) generateRandomEvents(db *gorm.DB, organizations []models.
 	editionSuffixes := []string{
 		"Edición Especial", "Nueva Generación", "Versión Pro", "Masterclass",
 		"Intensivo", "Express", "Premium", "Avanzado", "Básico", "Completo",
+	}
+
+	validImages := []string{
+		"/CloudEvents-logo-1@2x.png",
+		"/CloudEvents-logo-2@2x.png",
+		"/CloudEvents-logo-11@2x.png",
+		"/asturcon-low-1@2x.png",
+		"/cyberLogo-1@2x.png",
+		"/cyberLogo-gigapixel-art-scale-2-00x-godpix-1@2x.png",
+		"/cyberLogo-gigapixel-art-scale-2-00x-godpix-11@2x.png",
 	}
 
 	for i := 0; i < count; i++ {
@@ -607,6 +794,8 @@ func (es *EventSeeder) generateRandomEvents(db *gorm.DB, organizations []models.
 			}
 			return n.Int64() > 40 // 60% gratuitos
 		}()
+		
+		imageURL := validImages[utils.SecureRandInt(len(validImages))]
 
 		event := &models.Event{
 			Title:          title,
@@ -623,6 +812,7 @@ func (es *EventSeeder) generateRandomEvents(db *gorm.DB, organizations []models.
 			Status:         status,
 			IsPublic:       status == models.EventStatusPublished,
 			IsFree:         isFree,
+			ImageURL:       imageURL,
 		}
 
 		// Configurar ubicación

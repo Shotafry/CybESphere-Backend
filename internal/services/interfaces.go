@@ -36,6 +36,7 @@ type EventService interface {
 	// Métodos CRUD base
 	Get(ctx context.Context, id string, userCtx *common.UserContext) (*models.Event, error)
 	GetAll(ctx context.Context, opts common.QueryOptions, userCtx *common.UserContext) ([]*models.Event, *common.PaginationMeta, error)
+	GetEventBySlug(ctx context.Context, slug string) (*models.Event, error)
 	Create(ctx context.Context, dto dto.CreateEventRequest, userCtx *common.UserContext) (*models.Event, error)
 	Update(ctx context.Context, id string, dto dto.UpdateEventRequest, userCtx *common.UserContext) (*models.Event, error)
 	Delete(ctx context.Context, id string, userCtx *common.UserContext) error

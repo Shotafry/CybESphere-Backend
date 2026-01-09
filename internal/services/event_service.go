@@ -71,6 +71,11 @@ func (s *EventServiceImpl) GetPublicEvents(ctx context.Context, opts common.Quer
 	return s.eventRepo.GetPublicEvents(ctx, opts)
 }
 
+// GetEventBySlug obtiene un evento por su slug
+func (s *EventServiceImpl) GetEventBySlug(ctx context.Context, slug string) (*models.Event, error) {
+	return s.eventRepo.GetBySlug(ctx, slug)
+}
+
 // GetUpcomingEvents obtiene eventos futuros
 func (s *EventServiceImpl) GetUpcomingEvents(ctx context.Context, opts common.QueryOptions, userCtx *common.UserContext) ([]*models.Event, *common.PaginationMeta, error) {
 	// Aplicar filtros de seguridad

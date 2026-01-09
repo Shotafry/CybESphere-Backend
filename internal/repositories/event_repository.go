@@ -126,6 +126,16 @@ func (r *EventRepository) GetWithPreloads(ctx context.Context, id string, preloa
 	return &event, nil
 }
 
+// GetBySlug obtiene un evento por su slug
+func (r *EventRepository) GetBySlug(ctx context.Context, slug string) (*models.Event, error) {
+	var event models.Event
+	err := r.db.WithContext(ctx).First(&event, "slug = ?", slug).Error
+	if err != nil {
+		return nil, common.MapGormError(err)
+	}
+	return &event, nil
+}
+
 // IncrementViews incrementa el contador de visualizaciones
 func (r *EventRepository) IncrementViews(ctx context.Context, id string) error {
 	err := r.db.WithContext(ctx).Model(&models.Event{}).

@@ -10,6 +10,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 
 	"cybesphere-backend/internal/config"
@@ -125,10 +126,23 @@ func applyGlobalMiddleware(r *gin.Engine, cfg *config.Config) {
 	r.Use(middleware.ErrorHandler())
 
 	// CORS para desarrollo
-	if cfg.Monitoring.Environment == "development" || cfg.Security.CORSEnabled {
-		r.Use(middleware.CORSMiddleware(cfg))
-		logger.Info("CORS enabled")
+	// CORS Middleware configuration using gin-contrib/cors
+	corsConfig := cors.Config{
+		AllowOrigins:     []string{"http://localhost:5173"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Content-Length", "Accept-Encoding", "X-CSRF-Token", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
 	}
+
+	// Allow all origins in development
+	if cfg.Monitoring.Environment == "development" {
+		corsConfig.AllowOrigins = []string{"*"}
+	}
+
+	r.Use(cors.New(corsConfig))
+	logger.Infof("CORS configured for origins: %v", corsConfig.AllowOrigins)
 
 	// Rate limiting
 	if cfg.RateLimit.Enabled {

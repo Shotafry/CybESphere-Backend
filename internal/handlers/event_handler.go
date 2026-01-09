@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 
 	"cybesphere-backend/internal/common"
 	"cybesphere-backend/internal/dto"
@@ -56,6 +57,39 @@ func (h *EventHandler) PublishEvent(c *gin.Context) {
 
 	response := h.mapper.EventToResponse(event, userCtx)
 	common.SuccessResponse(c, http.StatusOK, "Evento publicado exitosamente", response)
+}
+
+// GetPublicEvent obtiene un evento público por ID o Slug
+func (h *EventHandler) GetPublicEvent(c *gin.Context) {
+	identifier := c.Param("id")
+	userCtx := extractUserContext(c)
+
+	var event *models.Event
+	var err error
+
+	// Verificar si es un UUID válido
+	if _, uuidErr := uuid.Parse(identifier); uuidErr == nil {
+		// Es un UUID, buscar por ID
+		event, err = h.eventService.Get(c.Request.Context(), identifier, userCtx)
+	} else {
+		// No es UUID, asumir que es Slug
+		event, err = h.eventService.GetEventBySlug(c.Request.Context(), identifier)
+	}
+
+	if err != nil {
+		common.ErrorResponse(c, err)
+		return
+	}
+
+	// Verificar qu el evento sea público si el usuario no tiene permisos especiales
+	// NOTA: Esto ya debería estar filtrado por el repositorio/servicio, pero doble check no hace daño
+	if !event.IsPublic && (userCtx == nil || !userCtx.IsAdmin()) {
+		common.ErrorResponse(c, common.NewBusinessError("event_not_found", "Evento no encontrado"))
+		return
+	}
+
+	response := h.mapper.EventToResponse(event, userCtx)
+	common.SuccessResponse(c, http.StatusOK, "Detalle del evento", response)
 }
 
 // CancelEvent método específico

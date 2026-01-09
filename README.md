@@ -18,6 +18,7 @@ Backend para plataforma de gestión de eventos de ciberseguridad desarrollado en
 - **Sistema de seeders** con datos realistas de ciberseguridad
 - **Middleware de seguridad**: CORS, Rate Limiting, Request ID, Recovery
 - **Endpoints completos** de autenticación, usuarios, organizaciones y eventos
+- **Soporte de Slugs** (SEO-friendly) para eventos y organizaciones
 - **Testing comprehensivo** unitario e integración con base de datos en memoria
 - **Docker Compose** para servicios de desarrollo
 - **Hot reload** configurado con Air

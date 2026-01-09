@@ -170,7 +170,7 @@ func setupPublicRoutes(v1 *gin.RouterGroup, cfg *config.Config, authMiddleware *
 
 		// Eventos públicos
 		public.GET("/events", app.Handlers.Events.GetAll)
-		public.GET("/events/:id", app.Handlers.Events.GetByID)
+		public.GET("/events/:id", app.Handlers.Events.GetPublicEvent)
 		public.GET("/events/featured", app.Handlers.Events.GetFeaturedEvents)
 		public.GET("/events/upcoming", app.Handlers.Events.GetUpcomingEvents)
 
